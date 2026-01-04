@@ -1,11 +1,13 @@
 # 🚀 Implementation & Testing Plan (V1.0)
 
+> **✅ Status:** Completed. See [README.md](README.md) for running instructions.
+
 ## 1. Project Overview
 **Goal:** Build a "Campus Crowd Density Awareness System" V1.0 running entirely on a single laptop.
 **Deployment:**
 - **Dev/Test:** Laptop Webcam (ID `0`).
 - **Demo:** External Wi-Fi IP Camera (RTSP/HTTP Stream).
-**Architecture:** Monolithic logical separation (Edge + Backend + Frontend) running locally.
+**Architecture:** Layered architecture and  logical separation (Edge + Backend + Frontend) running locally.
 
 ---
 
@@ -84,6 +86,21 @@
     - **Indicator:** Trend Arrow (Up/Down/Flat).
 2.  **Auto-Refresh:**
     - JavaScript `setInterval` to call `GET /current-status` every 2-5 seconds.
+
+### Phase 5: Enhancements (V1.1)
+**Objective:** Improve robustness and scalability.
+
+1.  **Multi-Camera Support:**
+    - Update Edge Service to accept `location_id` and `camera_source` as CLI arguments.
+    - Update Backend to store data in a dictionary keyed by `location_id`.
+    - Update Frontend to render multiple location cards dynamically.
+2.  **Data Persistence:**
+    - Save backend state to `crowd_data.json` on every update.
+    - Load state from file on startup to prevent data loss.
+3.  **Logging & Debugging:**
+    - Implement `logging` module in all services.
+    - Support `INFO`, `DEBUG`, and `CRITICAL` log levels via environment variables.
+    - Update startup script to allow easy switching of log levels.
 
 ---
 

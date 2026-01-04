@@ -182,7 +182,7 @@ Metadata Publisher
 ```
 Metadata Receiver
    ↓
-State Store (latest only)
+State Store (In-Memory + JSON Persistence)
    ↓
 Threshold & Alert Logic
    ↓
@@ -194,7 +194,8 @@ API Layer
 ### Responsibilities
 
 * Receive crowd metadata
-* Maintain latest state per location
+* Maintain latest state per location (Multi-camera support)
+* Persist state to disk (`crowd_data.json`) to survive restarts
 * Apply alert thresholds
 * Serve clean, read-only APIs to UI
 

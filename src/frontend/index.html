@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Plus</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .status-card {
+            transition: all 0.3s;
+            height: 100%;
+        }
+        .bg-low { background-color: #d4edda; color: #155724; }
+        .bg-medium { background-color: #fff3cd; color: #856404; }
+        .bg-high { background-color: #f8d7da; color: #721c24; }
+        .card-title { font-weight: bold; margin-bottom: 15px; }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h1>Campus CrowdPlus System</h1>
+        <p class="text-muted">Real-time monitoring of NITW Campus locations</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Canteen -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center status-card" id="card-canteen">
+                    <h5 class="card-title">Canteen</h5>
+                    <h2 class="display-4 fw-bold density-level">--</h2>
+                    <p class="card-text">
+                        Person Count: <span class="fw-bold person-count">--</span>
+                    </p>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Trend</small><br>
+                            <span class="trend-indicator">--</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Last Updated</small><br>
+                            <span class="last-updated">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Library -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center status-card" id="card-library">
+                    <h5 class="card-title">Library</h5>
+                    <h2 class="display-4 fw-bold density-level">--</h2>
+                    <p class="card-text">
+                        Person Count: <span class="fw-bold person-count">--</span>
+                    </p>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Trend</small><br>
+                            <span class="trend-indicator">--</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Last Updated</small><br>
+                            <span class="last-updated">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Corridor -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center status-card" id="card-corridor">
+                    <h5 class="card-title">Corridor</h5>
+                    <h2 class="display-4 fw-bold density-level">--</h2>
+                    <p class="card-text">
+                        Person Count: <span class="fw-bold person-count">--</span>
+                    </p>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Trend</small><br>
+                            <span class="trend-indicator">--</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Last Updated</small><br>
+                            <span class="last-updated">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center status-card" id="card-event">
+                    <h5 class="card-title">Event</h5>
+                    <h2 class="display-4 fw-bold density-level">--</h2>
+                    <p class="card-text">
+                        Person Count: <span class="fw-bold person-count">--</span>
+                    </p>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Trend</small><br>
+                            <span class="trend-indicator">--</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Last Updated</small><br>
+                            <span class="last-updated">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text-center mt-4">
+        <small class="text-muted">V1.0</small>
+    </div>
+</div>
+
+<script>
+    const BASE_API_URL = "http://localhost:8000/current-status";
+
+    async function fetchAndUpdate(cardId, locationId) {
+        try {
+            const response = await fetch(`${BASE_API_URL}/${locationId}`);
+            if (!response.ok) throw new Error("Network response was not ok");
+            const data = await response.json();
+            updateCard(cardId, data);
+        } catch (error) {
+            console.error(`Error fetching data for ${cardId}:`, error);
+            setOffline(cardId);
+        }
+    }
+
+    function updateCard(cardId, data) {
+        const card = document.getElementById(cardId);
+        if (!card) return;
+
+        const densityEl = card.querySelector(".density-level");
+        const countEl = card.querySelector(".person-count");
+        const trendEl = card.querySelector(".trend-indicator");
+        const timeEl = card.querySelector(".last-updated");
+
+        densityEl.innerText = data.density_level;
+        countEl.innerText = data.count;
+        trendEl.innerText = data.trend;
+        timeEl.innerText = new Date(data.timestamp).toLocaleTimeString();
+
+        // Update Color
+        card.className = "card-body text-center status-card"; // Reset
+        if (data.density_level === "Low") {
+            card.classList.add("bg-low");
+        } else if (data.density_level === "Medium") {
+            card.classList.add("bg-medium");
+        } else if (data.density_level === "High") {
+            card.classList.add("bg-high");
+        }
+    }
+
+    function setOffline(cardId) {
+        const card = document.getElementById(cardId);
+        if (!card) return;
+        card.querySelector(".density-level").innerText = "Offline";
+        card.className = "card-body text-center status-card bg-light";
+    }
+
+    // Staggered Updates (Every 2 seconds, offset by 500ms)
+    
+    // 1. Canteen (T=0ms)
+    fetchAndUpdate("card-canteen", "canteen");
+    setInterval(() => fetchAndUpdate("card-canteen", "canteen"), 2000);
+
+    // 2. Library (T=500ms)
+    setTimeout(() => {
+        fetchAndUpdate("card-library", "library");
+        setInterval(() => fetchAndUpdate("card-library", "library"), 2000);
+    }, 500);
+
+    // 3. Corridor (T=1000ms)
+    setTimeout(() => {
+        fetchAndUpdate("card-corridor", "corridor");
+        setInterval(() => fetchAndUpdate("card-corridor", "corridor"), 2000);
+    }, 1000);
+
+    // 4. Event (T=1500ms)
+    setTimeout(() => {
+        fetchAndUpdate("card-event", "event");
+        setInterval(() => fetchAndUpdate("card-event", "event"), 2000);
+    }, 1500);
+</script>
+
+</body>
+</html>

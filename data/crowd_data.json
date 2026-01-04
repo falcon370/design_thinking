@@ -1,0 +1,9 @@
+{
+    "canteen": {
+        "location_id": "canteen",
+        "timestamp": "2026-01-04T16:15:32.571635",
+        "count": 1,
+        "density_level": "Low",
+        "trend": "Stable"
+    }
+}
