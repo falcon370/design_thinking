@@ -24,6 +24,9 @@ if len(sys.argv) > 2:
 
 # Configure Logging
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+#BACKEND_HOST = os.getenv("BACKEND_HOST", "192.168.68.104")
+BACKEND_HOST = os.getenv("BACKEND_HOST", "localhost")
+BACKEND_PORT = os.getenv("BACKEND_PORT", "8000")
 
 # Ensure logs directory exists
 os.makedirs("logs", exist_ok=True)
@@ -38,13 +41,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(f"edge_service_{LOCATION_ID}")
 
-BACKEND_URL = "http://localhost:8000/update-crowd-data"
+BACKEND_URL = f"http://{BACKEND_HOST}:{BACKEND_PORT}/update-crowd-data"
 CONFIDENCE_THRESHOLD = 0.4
 SEND_INTERVAL = 2.0  # Send data every 2 seconds
 
 # Density Thresholds
-LOW_THRESHOLD = 5
-MEDIUM_THRESHOLD = 15
+LOW_THRESHOLD = 2
+MEDIUM_THRESHOLD = 3
 
 def get_density_level(count):
     if count <= LOW_THRESHOLD:

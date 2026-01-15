@@ -23,7 +23,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("backend_service")
 
-app = FastAPI(title="Campus Crowd Awareness Backend")
+app = FastAPI(title="Campus CrowdPlus Backend")
 
 # Ensure data directory exists
 os.makedirs("data", exist_ok=True)

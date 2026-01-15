@@ -23,6 +23,16 @@ Captures video frames, detects people using Computer Vision (YOLOv8), and pushes
     *   `Medium`: 6 - 15 people
     *   `High`: > 15 people
 
+### AI & Machine Learning Capabilities
+The system leverages **Computer Vision** to perform real-time analysis.
+
+*   **Model:** [YOLOv8 Nano (`yolov8n`)](https://github.com/ultralytics/ultralytics)
+    *   *Why Nano?* It is the smallest and fastest version, optimized for edge devices and laptops with limited CPU/GPU resources.
+*   **Task:** Object Detection.
+*   **Target Class:** `Person` (Class ID: `0`). The model is pre-trained on the COCO dataset but filtered to ignore all other objects (cars, bags, etc.).
+*   **Confidence Threshold:** `0.4` (40%). Only detections with >40% confidence are counted to reduce false positives.
+*   **Inference:** Performed locally on the device using the `ultralytics` Python library.
+
 ### Output (JSON Payload)
 Sent via `POST` request to `http://localhost:8000/update-crowd-data`.
 

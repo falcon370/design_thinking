@@ -24,102 +24,8 @@
         <p class="text-muted">Real-time monitoring of Campus locations</p>
     </div>
 
-    <div class="row g-4">
-        <!-- Canteen -->
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center status-card" id="card-canteen">
-                    <h5 class="card-title">Canteen</h5>
-                    <h2 class="display-4 fw-bold density-level">--</h2>
-                    <p class="card-text">
-                        Person Count: <span class="fw-bold person-count">--</span>
-                    </p>
-                    <hr>
-                    <div class="row">
-                        <div class="col-6">
-                            <small class="text-muted">Trend</small><br>
-                            <span class="trend-indicator">--</span>
-                        </div>
-                        <div class="col-6">
-                            <small class="text-muted">Last Updated</small><br>
-                            <span class="last-updated">--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Library -->
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center status-card" id="card-library">
-                    <h5 class="card-title">Library</h5>
-                    <h2 class="display-4 fw-bold density-level">--</h2>
-                    <p class="card-text">
-                        Person Count: <span class="fw-bold person-count">--</span>
-                    </p>
-                    <hr>
-                    <div class="row">
-                        <div class="col-6">
-                            <small class="text-muted">Trend</small><br>
-                            <span class="trend-indicator">--</span>
-                        </div>
-                        <div class="col-6">
-                            <small class="text-muted">Last Updated</small><br>
-                            <span class="last-updated">--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Corridor -->
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center status-card" id="card-corridor">
-                    <h5 class="card-title">Corridor</h5>
-                    <h2 class="display-4 fw-bold density-level">--</h2>
-                    <p class="card-text">
-                        Person Count: <span class="fw-bold person-count">--</span>
-                    </p>
-                    <hr>
-                    <div class="row">
-                        <div class="col-6">
-                            <small class="text-muted">Trend</small><br>
-                            <span class="trend-indicator">--</span>
-                        </div>
-                        <div class="col-6">
-                            <small class="text-muted">Last Updated</small><br>
-                            <span class="last-updated">--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Event -->
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center status-card" id="card-event">
-                    <h5 class="card-title">Event</h5>
-                    <h2 class="display-4 fw-bold density-level">--</h2>
-                    <p class="card-text">
-                        Person Count: <span class="fw-bold person-count">--</span>
-                    </p>
-                    <hr>
-                    <div class="row">
-                        <div class="col-6">
-                            <small class="text-muted">Trend</small><br>
-                            <span class="trend-indicator">--</span>
-                        </div>
-                        <div class="col-6">
-                            <small class="text-muted">Last Updated</small><br>
-                            <span class="last-updated">--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="row g-4" id="cards-container">
+        <!-- Cards will be injected here by JavaScript -->
     </div>
     
     <div class="text-center mt-4">
@@ -127,8 +33,48 @@
     </div>
 </div>
 
+<script src="config.js"></script>
 <script>
-    const BASE_API_URL = "http://localhost:8000/current-status";
+    const BASE_API_URL = `${API_CONFIG.BASE_URL}/current-status`;
+
+    // CONFIGURATION: Define your locations here
+    // sourceId allows multiple cards to pull from the same backend location for demo purposes
+    const LOCATIONS = [
+        { id: "canteen1", name: "Canteen (North)", sourceId: "canteen" },
+        { id: "canteen2", name: "Canteen (South)", sourceId: "canteen" },
+        { id: "canteen3", name: "Canteen (Entrance)", sourceId: "canteen" },
+        { id: "library", name: "Library", sourceId: "library" }
+    ];
+
+    const container = document.getElementById("cards-container");
+
+    // 1. Generate Cards Dynamically
+    LOCATIONS.forEach(loc => {
+        const cardHtml = `
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center status-card" id="card-${loc.id}">
+                    <h5 class="card-title">${loc.name}</h5>
+                    <h2 class="display-4 fw-bold density-level">--</h2>
+                    <p class="card-text">
+                        Person Count: <span class="fw-bold person-count">--</span>
+                    </p>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Trend</small><br>
+                            <span class="trend-indicator">--</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Last Updated</small><br>
+                            <span class="last-updated">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+        container.innerHTML += cardHtml;
+    });
 
     async function fetchAndUpdate(cardId, locationId) {
         try {
@@ -137,7 +83,7 @@
             const data = await response.json();
             updateCard(cardId, data);
         } catch (error) {
-            console.error(`Error fetching data for ${cardId}:`, error);
+            // console.error(`Error fetching data for ${cardId}:`, error);
             setOffline(cardId);
         }
     }
@@ -174,29 +120,25 @@
         card.className = "card-body text-center status-card bg-light";
     }
 
-    // Staggered Updates (Every 2 seconds, offset by 500ms)
-    
-    // 1. Canteen (T=0ms)
-    fetchAndUpdate("card-canteen", "canteen");
-    setInterval(() => fetchAndUpdate("card-canteen", "canteen"), 2000);
+    // 3. Start Polling (Randomized)
+    function startRandomPolling(loc) {
+        const cardId = `card-${loc.id}`;
+        const sourceId = loc.sourceId || loc.id; // Fallback to id if sourceId not set
 
-    // 2. Library (T=500ms)
-    setTimeout(() => {
-        fetchAndUpdate("card-library", "library");
-        setInterval(() => fetchAndUpdate("card-library", "library"), 2000);
-    }, 500);
+        const poll = async () => {
+            await fetchAndUpdate(cardId, sourceId);
+            
+            // Schedule next update with random delay between 1.5s and 3.5s
+            // This creates the "random sequence" effect
+            const nextDelay = Math.floor(Math.random() * 2000) + 1500;
+            setTimeout(poll, nextDelay);
+        };
 
-    // 3. Corridor (T=1000ms)
-    setTimeout(() => {
-        fetchAndUpdate("card-corridor", "corridor");
-        setInterval(() => fetchAndUpdate("card-corridor", "corridor"), 2000);
-    }, 1000);
+        // Initial start with random offset (0-1000ms)
+        setTimeout(poll, Math.random() * 1000);
+    }
 
-    // 4. Event (T=1500ms)
-    setTimeout(() => {
-        fetchAndUpdate("card-event", "event");
-        setInterval(() => fetchAndUpdate("card-event", "event"), 2000);
-    }, 1500);
+    LOCATIONS.forEach(loc => startRandomPolling(loc));
 </script>
 
 </body>

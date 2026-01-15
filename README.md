@@ -52,14 +52,22 @@ We have provided a PowerShell script to start all services in separate windows.
 
 1.  Open a PowerShell terminal in the project root.
 2.  Run the script:
-    ```powershell
-    .\start_system.ps1
-    ```
-    *Optional: Run with debug logging enabled:*
-    ```powershell
-    .\start_system.ps1 -LogLevel DEBUG
-    ```
-3.  The dashboard will be available at **[http://localhost:8081](http://localhost:8081)**.
+    *   **Localhost (Default):**
+        ```powershell
+        .\start_system.ps1
+        ```
+    *   **Specific IP (e.g., for mobile testing):**
+        If you want to access the dashboard from your phone or another computer, use your laptop's Wi-Fi IP address (e.g., `192.168.68.104`).
+        ```powershell
+        .\start_system.ps1 -HostIP "192.168.68.104"
+        ```
+    *   *Optional: Run with debug logging enabled:*
+        ```powershell
+        .\start_system.ps1 -LogLevel DEBUG
+        ```
+3.  The dashboard will be available at:
+    *   **Localhost:** [http://localhost:8081](http://localhost:8081)
+    *   **IP Mode:** `http://<YOUR_IP>:8081` (e.g., `http://192.168.68.104:8081`)
 4.  A window showing the camera feed with detections will appear.
 
 ### Option 2: Manual Startup
