@@ -17,19 +17,19 @@ sudo apt update
 sudo apt install vlc -y
 ```
 
-## Step 2: Start the Camera Stream (Robust Method)
-We will use `netcat` (nc) to handle the network stream, as it's more reliable than the built-in tool.
+## Step 2: Start the Camera Stream (Final Working Method: HTTP/MJPEG)
+The most reliable method that bypasses most firewalls is standard HTTP streaming with MJPEG.
 
 Run this on the Raspberry Pi:
 ```bash
-rpicam-vid -t 0 --inline --width 640 --height 480 --framerate 15 -o - | nc -l -p 8888
+libcamera-vid -t 0 --inline --width 640 --height 480 --framerate 15 --codec mjpeg -o - | cvlc stream:///dev/stdin --sout '#standard{access=http,mux=mpjpeg,dst=:8080}' :demux=mjpeg
 ```
-*   **If `nc: command not found`**, install it: `sudo apt install netcat-traditional -y`
-*   **Explanation:** Camera captures video -> Pipes (`|`) it to Netcat -> Netcat waits for a connection on Port 8888.
+*   **If errors occur**: Ensure `vlc` is installed (`sudo apt install vlc -y`).
 
 ## Step 3: Connect the System
 On your laptop, run:
 ```powershell
-.\start_system.ps1 -HostIP 192.168.68.107 -CameraURL "tcp://192.168.68.106:8888"
+.\start_system.ps1 -HostIP 192.168.68.107 -CameraURL "http://192.168.68.106:8080"
 ```
+*(Replace IPs with your actual laptop and RPi IPs)*
 
