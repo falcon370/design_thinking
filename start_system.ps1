@@ -1,6 +1,7 @@
 param (
     [string]$LogLevel = "INFO",
-    [string]$HostIP = "localhost",
+   [string]$HostIP = "192.168.68.107",
+   # [string]$HostIP = "localhost",
     [string]$CameraURL = "0"
 )
 

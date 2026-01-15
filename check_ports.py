@@ -1,7 +1,7 @@
 import socket
 
-target_ip = "192.168.68.107"
-ports_to_check = [554, 80, 8080, 8000, 37777]  # RTSP, HTTP, HTTP-Alt, Onvif/Dahua-proprietary
+target_ip = "192.168.68.106"
+ports_to_check = [8080, 8888, 8554, 22]
 
 print(f"Checking ports on {target_ip}...\n")
 

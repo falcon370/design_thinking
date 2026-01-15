@@ -25,7 +25,7 @@ if len(sys.argv) > 2:
 # Configure Logging
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 #BACKEND_HOST = os.getenv("BACKEND_HOST", "localhost")
-BACKEND_HOST = os.getenv("BACKEND_HOST", "192.168.68.108")
+BACKEND_HOST = os.getenv("BACKEND_HOST", "192.168.68.107")
 
 BACKEND_PORT = os.getenv("BACKEND_PORT", "8000")
 

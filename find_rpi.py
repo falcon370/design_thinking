@@ -67,19 +67,40 @@ def is_rpi_mac(mac):
 def main():
     print("🔍 Looking for Raspberry Pi on the network...")
     
-    # 1. Check mDNS
-    print("1️⃣  Trying hostname 'raspberrypi.local'...")
-    try:
-        ip = socket.gethostbyname("raspberrypi.local")
-        print(f"   ✅ Found 'raspberrypi.local' at IP: {ip}")
-        print(f"   👉 Use this IP in your configs.")
-        return
-    except:
-        print("   ❌ 'raspberrypi.local' not found.")
+    # 1. Check mDNS (Try standard and user-specific hostnames)
+    hostnames = ["raspberrypi.local", "napoleanpranav.local", "napoleanpranv.local"]
+    for host in hostnames:
+        print(f"1️⃣  Trying hostname '{host}'...")
+        try:
+            ip = socket.gethostbyname(host)
+            print(f"   ✅ Found '{host}' at IP: {ip}")
+            print(f"   👉 Use this IP in your configs.")
+            return
+        except:
+            print(f"   ❌ '{host}' not found.")
 
     # 2. Network Scan
     local_ip = get_local_ip()
+    
+    # Check for ICS (Internet Connection Sharing) Subnet
+    # Windows defaults the Host IP to 192.168.137.1 when sharing is enabled
+    try:
+        ip_output = subprocess.check_output("ipconfig", shell=True).decode('utf-8', errors='ignore')
+        
+        if "192.168.137.1" in ip_output:
+            print("\n✅ DETECTED ICS ENABLED! Your Laptop is 192.168.137.1")
+            print("   The RPi should be on the 192.168.137.x subnet.")
+            # Override local_ip to scan the shared subnet instead of Wi-Fi
+            local_ip = "192.168.137.1"
+            
+        elif "169.254." in ip_output and "192.168.137.1" not in ip_output:
+            print("\n⚠️  WARNING: Detected a '169.254.x.x' IP. Sharing is NOT active.")
+            print("   Auto-Config IP means the Laptop is waiting for a DHCP server that doesn't exist.")
+    except:
+        pass
+
     if not local_ip:
+
         print("❌ Could not determine local IP. Are you connected to a network?")
         return
 
@@ -99,29 +120,30 @@ def main():
                 pass
 
     # Read ARP table
-    print("   Checking ARP table for Raspberry Pi MAC addresses...")
+    print("   Checking ARP table for devices...")
     devices = get_arp_table()
-    found_rpi = False
+    found_possible_candidate = False
     
     for ip, mac in devices:
         vendor = "Unknown"
-        if is_rpi_mac(mac):
-            vendor = "Raspberry Pi"
-            found_rpi = True
-            print(f"   🎉 FOUND RASPBERRY PI: IP={ip}, MAC={mac}")
-            
-            # Check SSH
-            if check_ssh_port(ip):
-                print(f"      ✅ SSH (Port 22) is OPEN.")
-            else:
-                print(f"      ⚠️ SSH (Port 22) seems CLOSED.")
+        is_rpi = is_rpi_mac(mac)
+        
+        if is_rpi:
+            vendor = "Raspberry Pi (Confirmed via MAC)"
+            print(f"   🎉 FOUND RPi: IP={ip}, MAC={mac}")
         else:
-            # Uncomment to see all devices
-            # print(f"   Device: IP={ip}, MAC={mac}") 
+            print(f"   ❓ Device: IP={ip}, MAC={mac}")
+
+        # Check SSH on ALL devices
+        if check_ssh_port(ip):
+            print(f"      ✅ SSH (Port 22) is OPEN. (Strong Candidate!)")
+            found_possible_candidate = True
+        else:
+            # print(f"      x SSH Closed.")
             pass
 
-    if not found_rpi:
-        print("\n❌ No Raspberry Pi found via MAC address.")
+    if not found_possible_candidate and not any(is_rpi_mac(m) for _, m in devices):
+        print("\n❌ No Raspberry Pi confirmed.")
         print("Possible reasons:")
         print("1. RPi is not connected to the same Wi-Fi/Ethernet.")
         print("2. RPi is just powered on (USB) but not connected to a router.")

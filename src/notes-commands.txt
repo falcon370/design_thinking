@@ -2,6 +2,8 @@ netstat -ano | findstr :8000
 
 taskkill /PID 7732 /F
 
+taskkill /F /IM python.exe; taskkill /F /IM uvicorn.exe
+
 tasklist | findstr python
 
 .\start_system.ps1
@@ -15,3 +17,38 @@ git status
 ls -R
 
 ipconfig /all; arp -a; ping -n 1 raspberrypi.local
+arp -a
+
+# --- RPi Configuration ---
+# Device: RPi-4 Model B
+# Hostname: napoleanpranav
+# Credentials: napoleanpranav / pranav123
+
+# Connection Command:
+ssh napoleanpranav@napoleanpranav.local
+wifi bound to gokulum home wifi network
+
+RPi commands 
+cat /etc/os-release
+
+sudo apt update
+sudo apt install rpicam-apps-lite vlc -y
+rpicam-vid -t 0 --inline --width 640 --height 480 --framerate 15 -o - | cvlc stream:///dev/stdin --sout '#rtp{sdp=rtsp://:8554/stream}' :demux=h264
+.\start_system.ps1 -HostIP 192.168.68.107 -CameraURL "rtsp://192.168.68.106:8554/stream"
+rpicam-vid -t 0 --inline -o - | cvlc stream:///dev/stdin --sout '#standard{access=http,mux=ts,dst=:8080}' :demux=h264
+
+
+rpicam-vid -t 0 --inline --listen -o tcp://0.0.0.0:8888
+.\start_system.ps1 -HostIP 192.168.68.107 -CameraURL "tcp://192.168.68.106:8888"
+
+
+rpicam-vid -t 0 --inline --width 640 --height 480 --framerate 15 -o - | nc -l -p 8888
+.\start_system.ps1 -HostIP 192.168.68.107 -CameraURL "tcp://192.168.68.106:8888"
+rpicam-vid -t 0 --inline --width 640 --height 480 --framerate 15 --codec mjpeg -o - | cvlc stream:///dev/stdin --sout '#standard{access=http,mux=mpjpeg,dst=:8080}' :demux=mjpeg
+
+
+raspberrypi
+http://192.168.68.106:8080
+
+ http://192.168.68.107:8081/
+ 
