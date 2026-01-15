@@ -1,7 +1,7 @@
 param (
     [string]$LogLevel = "INFO",
-    [string]$HostIP = "localhost"
-    #[string]$HostIP = "192.168.68.104"
+    [string]$HostIP = "localhost",
+    [string]$CameraURL = "0"
 )
 
 # 1. Configure Frontend
@@ -19,7 +19,8 @@ Start-Process -FilePath "powershell" -ArgumentList "-NoExit", "-Command", "& {py
 
 # 4. Start Edge Service (Default: Canteen)
 Write-Host "Starting Edge Service (Canteen) with Log Level: $LogLevel connecting to $HostIP..."
-Start-Process -FilePath "powershell" -ArgumentList "-NoExit", "-Command", "& {`$env:LOG_LEVEL='$LogLevel'; `$env:BACKEND_HOST='$HostIP'; .\venv\Scripts\activate; python src/edge_service/main.py canteen 0}"
+Write-Host "Camera Source: $CameraURL"
+Start-Process -FilePath "powershell" -ArgumentList "-NoExit", "-Command", "& {`$env:LOG_LEVEL='$LogLevel'; `$env:BACKEND_HOST='$HostIP'; .\venv\Scripts\activate; python src/edge_service/main.py canteen '$CameraURL'}"
 
 # Start Edge Service (library)
 #Write-Host "Starting Edge Service (library) with Log Level: $LogLevel..."

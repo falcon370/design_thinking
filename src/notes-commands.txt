@@ -13,3 +13,5 @@ git config --get remote.origin.url
 git branch -vv
 git status
 ls -R
+
+ipconfig /all; arp -a; ping -n 1 raspberrypi.local
