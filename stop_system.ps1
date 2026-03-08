@@ -14,13 +14,24 @@ if ($processes) {
 }
 
 # Double check ports
-$ports = @(8000, 8081)
+$ports = @(8000, 8081, 5000)
 foreach ($port in $ports) {
     $p = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue
     if ($p) {
         Write-Host "Force killing process on port $port (PID $($p.OwningProcess))..."
         Stop-Process -Id $p.OwningProcess -Force
     }
+}
+
+# Check Config for helpful message
+$ConfigPath = "src/edge_service/config.json"
+if (Test-Path $ConfigPath) {
+    try {
+        $ConfigData = Get-Content -Raw -Path $ConfigPath | ConvertFrom-Json
+        if ($ConfigData.active_profile -eq "rpi") {
+            Write-Host "NOTE: You are in 'rpi' mode. Stop the remote edge service on the RPi manually if needed." -ForegroundColor Yellow
+        }
+    } catch {}
 }
 
 Write-Host "System is clean. You can now run .\start_system.ps1"

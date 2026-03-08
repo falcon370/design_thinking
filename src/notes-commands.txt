@@ -40,7 +40,7 @@ rpicam-vid -t 0 --inline -o - | cvlc stream:///dev/stdin --sout '#standard{acces
 
 rpicam-vid -t 0 --inline --listen -o tcp://0.0.0.0:8888
 .\start_system.ps1 -HostIP 192.168.68.107 -CameraURL "tcp://192.168.68.106:8888"
-
+source venv/bin/activate
 
 rpicam-vid -t 0 --inline --width 640 --height 480 --framerate 15 -o - | nc -l -p 8888
 .\start_system.ps1 -HostIP 192.168.68.107 -CameraURL "tcp://192.168.68.106:8888"
@@ -51,4 +51,30 @@ raspberrypi
 http://192.168.68.106:8080
 
  http://192.168.68.107:8081/
- 
+
+
+scp src/edge_service/main_pipe.py napoleanpranav@192.168.68.106:~/crowd_monitoring/edge_service/
+
+ cd ~/crowd_monitoring
+
+# 1. Create and Activate the Virtual Environment
+python3 -m venv venv source venv/bin/activate
+
+# 3. NOW run the test (while venv is active)
+python3 edge_service/test_cam.py
+source venv/bin/activate
+rpicam-vid -t 0 --inline --width 640 --height 480 --framerate 10 --codec mjpeg -o - | python3 -u edge_service/main_pipe.py canteen
+http://192.168.68.106:5000/video
+
+
+.\venv\Scripts\Activate
+# OR if you haven't created one yet:
+python -m venv venv
+.\venv\Scripts\Activate
+
+
+ssh napoleanpranav@napoleanpranav.local
+
+scp start_edge_service.sh napoleanpranav@192.168.68.106:~/crowd_monitoring/
+chmod +x ~/crowd_monitoring/start_edge_service.sh ~/crowd_monitoring/start_edge_service.sh
+./start_edge_service.sh

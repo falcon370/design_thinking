@@ -25,37 +25,27 @@
     </div>
 
     <div class="row g-4" id="cards-container">
-        <!-- Cards will be injected here by JavaScript -->
-    </div>
-    
-    <div class="text-center mt-4">
-        <small class="text-muted">V1.0</small>
-    </div>
-</div>
-
-<script src="config.js"></script>
-<script>
-    const BASE_API_URL = `${API_CONFIG.BASE_URL}/current-status`;
-
-    // CONFIGURATION: Define your locations here
-    // sourceId allows multiple cards to pull from the same backend location for demo purposes
-    const LOCATIONS = [
-        { id: "canteen1", name: "Canteen (North)", sourceId: "canteen" },
-        { id: "canteen2", name: "Canteen (South)", sourceId: "canteen" },
-        { id: "canteen3", name: "Canteen (Entrance)", sourceId: "canteen" },
-        { id: "library", name: "Library", sourceId: "library" }
-    ];
-
-    const container = document.getElementById("cards-container");
-
-    // 1. Generate Cards Dynamically
-    LOCATIONS.forEach(loc => {
-        const cardHtml = `
-        <div class="col-md-6">
+        <!-- Live Video Card -->
+        <div class="col-md-8">
             <div class="card shadow-sm h-100">
-                <div class="card-body text-center status-card" id="card-${loc.id}">
-                    <h5 class="card-title">${loc.name}</h5>
-                    <h2 class="display-4 fw-bold density-level">--</h2>
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0" id="stream-title">Live Edge Feed</h5>
+                </div>
+                <div class="card-body p-0 text-center bg-black d-flex align-items-center justify-content-center">
+                    <!-- 
+                        Stream URL is now dynamically loaded from config.js
+                    -->
+                    <img id="live-stream" src="" class="img-fluid" style="max-height: 480px; width: 100%; object-fit: contain;" alt="Waiting for Stream...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Card -->
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center status-card" id="card-canteen">
+                    <h5 class="card-title">Canteen Density</h5>
+                    <h2 class="display-4 fw-bold density-level">waiting...</h2>
                     <p class="card-text">
                         Person Count: <span class="fw-bold person-count">--</span>
                     </p>
@@ -72,74 +62,80 @@
                     </div>
                 </div>
             </div>
-        </div>`;
-        container.innerHTML += cardHtml;
-    });
+        </div>
+    </div>
+    
+    <div class="text-center mt-4">
+        <small class="text-muted">System V2.0 - Edge Hybrid Architecture</small>
+    </div>
+</div>
 
-    async function fetchAndUpdate(cardId, locationId) {
+<script src="config.js"></script>
+<script>
+    const BASE_API_URL = `${API_CONFIG.BASE_URL}/current-status`;
+
+    // Apply Dynamic Configuration
+    document.getElementById('live-stream').src = API_CONFIG.STREAM_URL;
+    document.getElementById('stream-title').innerText = `Live Edge Feed (${API_CONFIG.PROFILE.toUpperCase()})`;
+
+    // Only one location for now: The Canteen
+    const LOCATION_ID = "canteen";
+    const CARD_ID = "card-canteen";
+
+    async function fetchAndUpdate() {
         try {
-            const response = await fetch(`${BASE_API_URL}/${locationId}`);
+            const response = await fetch(`${BASE_API_URL}/${LOCATION_ID}`);
             if (!response.ok) throw new Error("Network response was not ok");
             const data = await response.json();
-            updateCard(cardId, data);
+            
+            // If data is empty (no connection yet), keep waiting
+            if (!data.density_level) return;
+
+            updateCard(CARD_ID, data);
         } catch (error) {
-            // console.error(`Error fetching data for ${cardId}:`, error);
-            setOffline(cardId);
+            console.log("Backend polling error", error);
+            setOffline(CARD_ID);
         }
     }
 
     function updateCard(cardId, data) {
-        const card = document.getElementById(cardId);
-        if (!card) return;
+        const cardBody = document.getElementById(cardId);
+        if (!cardBody) return;
 
-        const densityEl = card.querySelector(".density-level");
-        const countEl = card.querySelector(".person-count");
-        const trendEl = card.querySelector(".trend-indicator");
-        const timeEl = card.querySelector(".last-updated");
+        const densityEl = cardBody.querySelector(".density-level");
+        const countEl = cardBody.querySelector(".person-count");
+        const trendEl = cardBody.querySelector(".trend-indicator");
+        const timeEl = cardBody.querySelector(".last-updated");
 
+        // Update Text
         densityEl.innerText = data.density_level;
         countEl.innerText = data.count;
-        trendEl.innerText = data.trend;
-        timeEl.innerText = new Date(data.timestamp).toLocaleTimeString();
-
-        // Update Color
-        card.className = "card-body text-center status-card"; // Reset
-        if (data.density_level === "Low") {
-            card.classList.add("bg-low");
-        } else if (data.density_level === "Medium") {
-            card.classList.add("bg-medium");
-        } else if (data.density_level === "High") {
-            card.classList.add("bg-high");
+        trendEl.innerText = data.trend || "Stable";
+        
+        if (data.timestamp) {
+            const date = new Date(data.timestamp);
+            timeEl.innerText = date.toLocaleTimeString();
         }
+
+        // Color Coding
+        cardBody.classList.remove("bg-low", "bg-medium", "bg-high", "bg-light");
+        if (data.density_level === "Low") cardBody.classList.add("bg-low");
+        else if (data.density_level === "Medium") cardBody.classList.add("bg-medium");
+        else if (data.density_level === "High") cardBody.classList.add("bg-high");
     }
 
     function setOffline(cardId) {
-        const card = document.getElementById(cardId);
-        if (!card) return;
-        card.querySelector(".density-level").innerText = "Offline";
-        card.className = "card-body text-center status-card bg-light";
+        const cardBody = document.getElementById(cardId);
+        if (cardBody) {
+             cardBody.querySelector(".density-level").innerText = "Offline";
+             cardBody.classList.remove("bg-low", "bg-medium", "bg-high");
+             cardBody.classList.add("bg-light");
+        }
     }
 
-    // 3. Start Polling (Randomized)
-    function startRandomPolling(loc) {
-        const cardId = `card-${loc.id}`;
-        const sourceId = loc.sourceId || loc.id; // Fallback to id if sourceId not set
-
-        const poll = async () => {
-            await fetchAndUpdate(cardId, sourceId);
-            
-            // Schedule next update with random delay between 1.5s and 3.5s
-            // This creates the "random sequence" effect
-            const nextDelay = Math.floor(Math.random() * 2000) + 1500;
-            setTimeout(poll, nextDelay);
-        };
-
-        // Initial start with random offset (0-1000ms)
-        setTimeout(poll, Math.random() * 1000);
-    }
-
-    LOCATIONS.forEach(loc => startRandomPolling(loc));
+    // Poll every 2 seconds
+    setInterval(fetchAndUpdate, 2000);
+    fetchAndUpdate(); // Initial call
 </script>
-
 </body>
 </html>
